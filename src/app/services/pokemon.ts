@@ -25,6 +25,21 @@ export interface PokemonDetail {
     }[];
 }
 
+// Interface décrivant la réponse de l'endpoint pokemon-species.
+// On ne garde que le champ qui nous intéresse : flavor_text_entries.
+interface PokemonSpeciesResponse {
+    flavor_text_entries: {
+        flavor_text: string;
+        language: { name: string };
+        version: { name: string };
+    }[];
+}
+
+export interface PokedexEntry {
+    version: string;
+    text: string;
+}
+
 // @Injectable indique à Angular que cette classe peut être "injectée" dans d'autres composants ou services (système d'injection de dépendances).
 // providedIn: 'root' signifie que ce service est disponible dans TOUTE l'application, sans avoir à le déclarer ailleurs.
 @Injectable({
@@ -32,10 +47,9 @@ export interface PokemonDetail {
 })
 export class PokemonService {
     // L'URL de base de l'API qu'on va appeler. 
-    private apiUrl = 'https://pokeapi.co/api/v2/pokemon';
-    //'https://pokeapi.co/api/v2/pokemon?limit=20'; ?limit=20 signifie qu'on demande seulement les 20 premiers Pokémon.
+    private apiUrl = 'https://pokeapi.co/api/v2/';
 
-    constructor(private http: HttpClient) { } //Service Angular pour requête HTTP
+    constructor(private http: HttpClient) { }
 
     // Cette méthode va chercher la liste des Pokémon et la renvoie sous forme d'Observable<Pokemon[]>
     getPokemonList(): Observable<Pokemon[]> {
@@ -52,7 +66,7 @@ export class PokemonService {
         // });
 
         // .pipe() + map() permet de TRANSFORMER les données reçues avant de les renvoyer à celui qui appelle cette méthode.
-        return this.http.get<PokemonApiResponse>(`${this.apiUrl}?limit=1500`).pipe(
+        return this.http.get<PokemonApiResponse>(`${this.apiUrl}pokemon?limit=1500`).pipe(
             map(response => response.results.map(pokemon => ({ name: pokemon.name, url: pokemon.url, imageUrl: this.extractImageUrl(pokemon.url) })
             )
             ))
@@ -60,7 +74,7 @@ export class PokemonService {
 
     // Récupère les détails d'UN SEUL Pokémon, identifié par son nom.
     getPokemonDetail(name: string): Observable<PokemonDetail> {
-        return this.http.get<PokemonDetail>(`${this.apiUrl}/${name}`);
+        return this.http.get<PokemonDetail>(`${this.apiUrl}pokemon/${name}`);
     }
 
     private extractImageUrl(url: string): string {
@@ -68,5 +82,19 @@ export class PokemonService {
         const segments = url.split('/').filter(Boolean); // filter(Boolean) enlève les segments vides
         const id = segments[segments.length - 1];
         return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+    }
+
+    getPokemonDescription(name: string): Observable<PokedexEntry[]> {
+        return this.http.get<PokemonSpeciesResponse>(
+            `${this.apiUrl}pokemon-species/${name}`
+        ).pipe(map(
+            response => {
+                return response.flavor_text_entries.filter(entry => entry.language.name === 'fr')
+                    .map(entry => ({
+                        version: entry.version.name,
+                        text: entry.flavor_text.replace(/[\n\f]/g, ' ')
+                    }))
+            })
+        );
     }
 }

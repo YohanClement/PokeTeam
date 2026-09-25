@@ -1,6 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { PokemonService, PokemonDetail as PokemonDetailModel } from '../../services/pokemon';
+import { PokemonService, PokemonDetail as PokemonDetailModel, PokedexEntry } from '../../services/pokemon';
 import { DecimalPipe } from '@angular/common';
 
 const TYPE_COLORS: Record<string, string> = {
@@ -32,6 +32,7 @@ const TYPE_COLORS: Record<string, string> = {
 })
 export class PokemonDetail implements OnInit {
   pokemon = signal<PokemonDetailModel | null>(null);
+  descriptions = signal<PokedexEntry[]>([]);
 
   constructor(
     private route: ActivatedRoute,
@@ -42,11 +43,18 @@ export class PokemonDetail implements OnInit {
     // this.route.snapshot.paramMap.get() récupère la valeur du paramètre.
     // snapshot c'est a l'instant t
     const name = this.route.snapshot.paramMap.get('name');
+
     if (name) {
       this.pokemonService.getPokemonDetail(name).subscribe({
         next: (data) => { this.pokemon.set(data); },
         error: (err) => { console.error('Erreur lors du chargement du détail:', err); }
       });
+      
+      this.pokemonService.getPokemonDescription(name).subscribe({
+        next: (data) => { this.descriptions.set(data) },
+        error: (err) => { console.error('Erreur lors du chargement des descriptions:', err) }
+      })
+
     }
   }
 
@@ -55,10 +63,10 @@ export class PokemonDetail implements OnInit {
   }
 
   convertWeight(weight: number): number {
-    return weight /10;
+    return weight / 10;
   }
 
   convertHeight(height: number): number {
-    return height*10;
+    return height * 10;
   }
 }

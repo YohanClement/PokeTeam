@@ -16,6 +16,13 @@
           <span class="type-badge" [style.background]="getTypeColor(t.type.name)">{{ t.type.name }}</span>
         }
       </div>
+      <div class="descriptions">
+        @for (entry of descriptions(); track entry.version) {
+          <div class="description-entry">
+            <p>{{ entry.text }}</p>
+          </div>
+        }
+      </div>
     </div>
 
   } @else {

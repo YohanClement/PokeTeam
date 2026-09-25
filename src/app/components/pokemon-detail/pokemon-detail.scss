@@ -55,10 +55,6 @@ $yellow-light: #f4d03f;
     border-radius: 20px;
     font-size: 0.9rem;
     transition: background 0.15s ease;
-
-    &:hover {
-      background: darken($pokedex-red-dark, 8%);
-    }
   }
 
   // "L'écran" qui contient toutes les infos du Pokémon
