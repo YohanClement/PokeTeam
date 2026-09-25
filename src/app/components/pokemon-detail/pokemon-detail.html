@@ -1,32 +1,43 @@
-<div class="detail-container">
+<div class="detail-container pokedex-box">
 
-  <a routerLink="/">← Retour à la liste</a>
+  <a routerLink="/" class="pokedex-link">← Retour à la liste</a>
 
   @if (pokemon(); as p) {
-    <div class="screen">
-      <h1>{{ p.name }}</h1>
-      
-      <img [src]="p.sprites.front_default" [alt]="p.name">
+  <div class="screen pokedex-screen">
+    <h1>{{ frenchName() }}</h1>
 
-      <p>Taille : {{ convertHeight(p.height) | number: '1.0-2'}} cm</p>
-      <p>Poids : {{ convertWeight(p.weight) | number: '1.0-2'}} kg</p>
+    <div class="image-and-descriptions">
 
-      <div class="types">
-        @for (t of p.types; track t.type.name) {
-          <span class="type-badge" [style.background]="getTypeColor(t.type.name)">{{ t.type.name }}</span>
-        }
+      <!-- Colonne de gauche : image + types + taille/poids -->
+      <div class="left-column">
+        <img [src]="p.sprites.front_default" [alt]="p.name">
+
+        <div class="types">
+          @for (t of p.types; track t.type.name) {
+          <span class="type-badge" [style.background]="getTypeColor(t.type.name)">
+            {{ t.type.name }}
+          </span>
+          }
+        </div>
+
+        <p>Taille : {{ convertHeight(p.height) | number:'1.0-0' }} cm</p>
+        <p>Poids : {{ convertWeight(p.weight) | number:'1.1-1' }} kg</p>
       </div>
+
+      <!-- Colonne de droite : les descriptions -->
       <div class="descriptions">
-        @for (entry of descriptions(); track entry.version) {
-          <div class="description-entry">
-            <p>{{ entry.text }}</p>
-          </div>
+        @for (entry of descriptions(); track entry.text) {
+        <div class="description-entry">
+          <p>{{ entry.text }}</p>
+        </div>
         }
       </div>
+
     </div>
+  </div>
 
   } @else {
-    <p>Chargement...</p>
+  <p>Chargement...</p>
   }
 
 </div>

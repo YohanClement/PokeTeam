@@ -33,6 +33,7 @@ const TYPE_COLORS: Record<string, string> = {
 export class PokemonDetail implements OnInit {
   pokemon = signal<PokemonDetailModel | null>(null);
   descriptions = signal<PokedexEntry[]>([]);
+  frenchName = signal<string>('');
 
   constructor(
     private route: ActivatedRoute,
@@ -41,7 +42,7 @@ export class PokemonDetail implements OnInit {
 
   ngOnInit(): void {
     // this.route.snapshot.paramMap.get() récupère la valeur du paramètre.
-    // snapshot c'est a l'instant t
+    // snapshot c'est à l'instant t
     const name = this.route.snapshot.paramMap.get('name');
 
     if (name) {
@@ -49,12 +50,14 @@ export class PokemonDetail implements OnInit {
         next: (data) => { this.pokemon.set(data); },
         error: (err) => { console.error('Erreur lors du chargement du détail:', err); }
       });
-      
-      this.pokemonService.getPokemonDescription(name).subscribe({
-        next: (data) => { this.descriptions.set(data) },
+
+      this.pokemonService.getPokemonSpeciesData(name).subscribe({
+        next: (data) => { 
+          this.frenchName.set(data.frenchName); 
+          this.descriptions.set(data.descriptions);
+        },
         error: (err) => { console.error('Erreur lors du chargement des descriptions:', err) }
       })
-
     }
   }
 

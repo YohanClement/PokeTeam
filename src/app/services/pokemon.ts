@@ -28,11 +28,20 @@ export interface PokemonDetail {
 // Interface décrivant la réponse de l'endpoint pokemon-species.
 // On ne garde que le champ qui nous intéresse : flavor_text_entries.
 interface PokemonSpeciesResponse {
+    names: {
+        name: string;
+        language: { name: string };
+    }[];
     flavor_text_entries: {
         flavor_text: string;
         language: { name: string };
         version: { name: string };
     }[];
+}
+
+export interface PokemonSpeciesData {
+    frenchName: string;
+    descriptions: PokedexEntry[];
 }
 
 export interface PokedexEntry {
@@ -84,17 +93,32 @@ export class PokemonService {
         return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
     }
 
-    getPokemonDescription(name: string): Observable<PokedexEntry[]> {
+    getPokemonSpeciesData(name: string): Observable<PokemonSpeciesData> {
         return this.http.get<PokemonSpeciesResponse>(
             `${this.apiUrl}pokemon-species/${name}`
         ).pipe(map(
             response => {
-                return response.flavor_text_entries.filter(entry => entry.language.name === 'fr')
+                const frenchNameEntry = response.names.find(n => n.language.name === 'fr');
+                const descriptions = response.flavor_text_entries
+                    .filter(entry => entry.language.name === 'fr')
                     .map(entry => ({
                         version: entry.version.name,
                         text: entry.flavor_text.replace(/[\n\f]/g, ' ')
-                    }))
-            })
-        );
-    }
+                    }));
+
+                // On déduplique en se basant sur le texte : si deux entrées ont exactement le même contenu, on ne garde que la première rencontrée.
+                const seenTexts = new Set<string>();
+                const uniqueDescriptions = descriptions.filter(entry => {
+                    if (seenTexts.has(entry.text)) return false; // on l'a déjà vu, on l'exclut
+                    seenTexts.add(entry.text);
+                    return true; // première fois qu'on le voit, on le garde
+                });
+
+                return {
+                    frenchName: frenchNameEntry?.name ?? name,
+                    descriptions: uniqueDescriptions
+            };
+    })
+    );
+}
 }
