@@ -1,9 +1,31 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { PokemonService, PokemonDetail as PokemonDetailModel } from '../../services/pokemon';
+import { DecimalPipe } from '@angular/common';
+
+const TYPE_COLORS: Record<string, string> = {
+  fire: '#f08030',
+  water: '#6890f0',
+  grass: '#78c850',
+  electric: '#f8d030',
+  ice: '#98d8d8',
+  fighting: '#c03028',
+  poison: '#a040a0',
+  ground: '#e0c068',
+  flying: '#a890f0',
+  psychic: '#f85888',
+  bug: '#a8b820',
+  rock: '#b8a038',
+  ghost: '#705898',
+  dragon: '#7038f8',
+  dark: '#705848',
+  steel: '#b8b8d0',
+  fairy: '#ee99ac',
+  normal: '#a8a878',
+};
 
 @Component({
-  imports: [RouterLink],
+  imports: [RouterLink, DecimalPipe],
   selector: 'app-pokemon-detail',
   styleUrl: './pokemon-detail.scss',
   templateUrl: './pokemon-detail.html',
@@ -26,5 +48,17 @@ export class PokemonDetail implements OnInit {
         error: (err) => { console.error('Erreur lors du chargement du détail:', err); }
       });
     }
+  }
+
+  getTypeColor(typeName: string): string {
+    return TYPE_COLORS[typeName] ?? '#a8a878';
+  }
+
+  convertWeight(weight: number): number {
+    return weight /10;
+  }
+
+  convertHeight(height: number): number {
+    return height*10;
   }
 }

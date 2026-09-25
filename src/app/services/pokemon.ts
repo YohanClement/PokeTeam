@@ -1,15 +1,16 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 
 export interface Pokemon {
     name: string;
     url: string;
+    imageUrl: string;
 }
 
 // On définit une "interface" : une sorte de contrat qui décrit la forme (structure) d'un objet Pokémon tel qu'il est fourni par la PokéAPI.
-interface PokemonAPiResponse {
-    results: Pokemon[];
+interface PokemonApiResponse {
+    results: { name: string; url: string }[];
 }
 
 export interface PokemonDetail {
@@ -20,7 +21,7 @@ export interface PokemonDetail {
         front_default: string
     };
     types: {
-        type: {name: string;};
+        type: { name: string; };
     }[];
 }
 
@@ -38,21 +39,34 @@ export class PokemonService {
 
     // Cette méthode va chercher la liste des Pokémon et la renvoie sous forme d'Observable<Pokemon[]>
     getPokemonList(): Observable<Pokemon[]> {
-        return new Observable(observer => {
-            //renvoie une requête HTTP de type get vers l'URL de l'application
-            this.http.get<PokemonAPiResponse>(this.apiUrl).subscribe({
-                //next : si la requête réussit. on extrait le tableau et le transmets à l'observer
-                next: (response) => observer.next(response.results),
-                //error : en cas d'échec. error est transmis
-                error: (err) => observer.error(err),
-                //complete quand le fluix est terminé
-                complete: () => observer.complete()
-            });
-        });
+        // return new Observable(observer => {
+        //     //renvoie une requête HTTP de type get vers l'URL de l'application
+        //     this.http.get<PokemonAPiResponse>(this.apiUrl).subscribe({
+        //         //next : si la requête réussit. on extrait le tableau et le transmets à l'observer
+        //         next: (response) => observer.next(response.results),
+        //         //error : en cas d'échec. error est transmis
+        //         error: (err) => observer.error(err),
+        //         //complete quand le fluix est terminé
+        //         complete: () => observer.complete()
+        //     });
+        // });
+
+        // .pipe() + map() permet de TRANSFORMER les données reçues avant de les renvoyer à celui qui appelle cette méthode.
+        return this.http.get<PokemonApiResponse>(`${this.apiUrl}?limit=1500`).pipe(
+            map(response => response.results.map(pokemon => ({ name: pokemon.name, url: pokemon.url, imageUrl: this.extractImageUrl(pokemon.url) })
+            )
+            ))
     }
 
-    // Nouvelle méthode : récupère les détails d'UN SEUL Pokémon,identifié par son nom.
+    // Récupère les détails d'UN SEUL Pokémon, identifié par son nom.
     getPokemonDetail(name: string): Observable<PokemonDetail> {
         return this.http.get<PokemonDetail>(`${this.apiUrl}/${name}`);
+    }
+
+    private extractImageUrl(url: string): string {
+        // On récupère le dernier segment numérique de l'URL.
+        const segments = url.split('/').filter(Boolean); // filter(Boolean) enlève les segments vides
+        const id = segments[segments.length - 1];
+        return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
     }
 }

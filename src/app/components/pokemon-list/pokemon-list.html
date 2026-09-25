@@ -2,14 +2,15 @@
     <h1>Pokédex</h1>
 
     <div class="pokemon-grid">
-        @for (pokemon of pokemons(); track pokemon.name){
-        <!-- routerLink permet de naviguer sans recharger toute la page. On construit dynamiquement l'URL avec le nom du Pokémon. -->
-        <div class="pokemon-card" [routerLink]="['/pokemon', pokemon.name]">
-            <h3>{{ pokemon.name }}</h3>
-        </div>
+        @for (pokemon of pokemons(); track pokemon.name) {
+        <a class="pokemon-card" [routerLink]="['/pokemon', pokemon.name]">
+            <img [src]="pokemon.imageUrl" [alt]="pokemon.name" loading="lazy">
+        </a>
         }
     </div>
-    @if (pokemons().length === 0){
+
+    @if (pokemons().length === 0) {
     <p>Chargement des Pokémon...</p>
     }
+
 </div>
