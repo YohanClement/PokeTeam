@@ -1,1 +1,28 @@
-<p>pokemon-detail works!</p>
+<div class="detail-container">
+
+  <!-- Lien pour revenir à la liste -->
+  <a routerLink="/">← Retour à la liste</a>
+
+  @if (pokemon(); as p) {
+    <!-- 
+      "as p" crée une variable locale "p" contenant la valeur du signal,
+      pour éviter d'écrire pokemon() partout dans le template.
+    -->
+    <h1>{{ p.name }}</h1>
+    
+    <img [src]="p.sprites.front_default" [alt]="p.name">
+
+    <p>Taille : {{ p.height }}</p>
+    <p>Poids : {{ p.weight }}</p>
+
+    <div class="types">
+      @for (t of p.types; track t.type.name) {
+        <span class="type-badge">{{ t.type.name }}</span>
+      }
+    </div>
+
+  } @else {
+    <p>Chargement...</p>
+  }
+
+</div>

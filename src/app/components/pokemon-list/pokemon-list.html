@@ -3,12 +3,13 @@
 
     <div class="pokemon-grid">
         @for (pokemon of pokemons(); track pokemon.name){
-        <div class="pokemon-card">
+        <!-- routerLink permet de naviguer sans recharger toute la page. On construit dynamiquement l'URL avec le nom du Pokémon. -->
+        <div class="pokemon-card" [routerLink]="['/pokemon', pokemon.name]">
             <h3>{{ pokemon.name }}</h3>
         </div>
         }
     </div>
     @if (pokemons().length === 0){
-        <p>Chargement des Pokémon...</p>
+    <p>Chargement des Pokémon...</p>
     }
 </div>
