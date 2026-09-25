@@ -1,1 +1,14 @@
-<p>pokemon-list works!</p>
+<div class="pokemon-container">
+    <h1>Pokédex</h1>
+
+    <div class="pokemon-grid">
+        @for (pokemon of pokemons(); track pokemon.name){
+        <div class="pokemon-card">
+            <h3>{{ pokemon.name }}</h3>
+        </div>
+        }
+    </div>
+    @if (pokemons().length === 0){
+        <p>Chargement des Pokémon...</p>
+    }
+</div>
