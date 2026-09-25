@@ -17,6 +17,7 @@ $screen-bg: #a2d8a2;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   position: relative;
   max-width: 70%;
+  box-sizing: border-box;
 
   &::before {
     content: '';
@@ -50,6 +51,7 @@ $screen-bg: #a2d8a2;
   border: 6px solid $pokedex-red-dark;
   border-radius: 12px;
   box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.2);
+  padding: 1.5rem
 }
 
 // Le bouton "retour" réutilisable

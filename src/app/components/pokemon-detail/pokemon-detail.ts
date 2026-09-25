@@ -1,6 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { PokemonService, PokemonDetail as PokemonDetailModel, PokedexEntry } from '../../services/pokemon';
+import { PokemonService, PokemonDetail as PokemonDetailModel, PokedexEntry, PokemonVariant } from '../../services/pokemon';
 import { DecimalPipe } from '@angular/common';
 
 const TYPE_COLORS: Record<string, string> = {
@@ -33,32 +33,43 @@ const TYPE_COLORS: Record<string, string> = {
 export class PokemonDetail implements OnInit {
   pokemon = signal<PokemonDetailModel | null>(null);
   descriptions = signal<PokedexEntry[]>([]);
-  frenchName = signal<string>('');
+  Name = signal<string>('');
+  variants = signal<PokemonVariant[]>([]);
+  baseName = '';
+  currentName = signal<string>('');
 
-  constructor(
-    private route: ActivatedRoute,
-    private pokemonService: PokemonService
-  ) { }
+  constructor(private route: ActivatedRoute, private pokemonService: PokemonService) { }
 
   ngOnInit(): void {
     // this.route.snapshot.paramMap.get() récupère la valeur du paramètre.
     // snapshot c'est à l'instant t
     const name = this.route.snapshot.paramMap.get('name');
+    if (name) { this.baseName = name; this.loadPokemon(name); }
+  }
 
-    if (name) {
-      this.pokemonService.getPokemonDetail(name).subscribe({
-        next: (data) => { this.pokemon.set(data); },
-        error: (err) => { console.error('Erreur lors du chargement du détail:', err); }
-      });
+  private loadPokemon(name: string): void {
+    this.currentName.set(name);
+    this.pokemonService.getPokemonDetail(name).subscribe({
+      next: (data) => { this.pokemon.set(data); },
+      error: (err) => { console.error('Erreur lors du chargement du détail:', err); }
+    });
 
-      this.pokemonService.getPokemonSpeciesData(name).subscribe({
-        next: (data) => { 
-          this.frenchName.set(data.frenchName); 
-          this.descriptions.set(data.descriptions);
-        },
-        error: (err) => { console.error('Erreur lors du chargement des descriptions:', err) }
-      })
-    }
+    this.pokemonService.getPokemonSpeciesData(name).subscribe({
+      next: (data) => {
+        this.Name.set(data.frenchName);
+        this.descriptions.set(data.descriptions);
+        this.variants.set(data.variants);
+      },
+      error: (err) => { console.error('Erreur lors du chargement des descriptions:', err) }
+    })
+  }
+
+  onSelectVariant(variantName: string): void {
+    this.loadPokemon(variantName);
+  }
+
+  onBackToBaseForm(): void {
+    this.loadPokemon(this.baseName);
   }
 
   getTypeColor(typeName: string): string {
